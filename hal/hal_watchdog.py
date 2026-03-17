@@ -27,6 +27,8 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+from hal.simulation.scene_io import load_environment_doc, load_scene_from_md, save_environment_doc
+
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
@@ -63,26 +65,23 @@ _FENCE_CLOSE = "```"
 
 
 def _load_scene(path: Path) -> dict[str, dict]:
-    if not path.exists():
-        return {}
-    m = _ACTION_RE.search(path.read_text(encoding="utf-8"))
-    if not m:
-        return {}
-    try:
-        d = json.loads(m.group(1))
-        return d if isinstance(d, dict) else {}
-    except json.JSONDecodeError:
-        return {}
+    return load_scene_from_md(path)
 
 
 def _save_scene(path: Path, scene: dict[str, dict]) -> None:
-    sj = json.dumps(scene, indent=2, ensure_ascii=False)
-    path.write_text(
-        f"# Environment Scene-Graph\n\n"
-        f"Auto-updated by HAL Watchdog.\n\n"
-        f"{_FENCE_OPEN}\n{sj}\n{_FENCE_CLOSE}\n",
-        encoding="utf-8",
-    )
+    existing = load_environment_doc(path)
+    updated = {
+        "schema_version": "oea.environment.v1",
+        "updated_at": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
+        "scene_graph": existing.get("scene_graph", {"nodes": [], "edges": []}),
+        "robots": existing.get("robots", {}),
+        "objects": scene,
+    }
+    # Preserve optional global sections if present.
+    for key in ("map", "tf", "nav_state"):
+        if key in existing:
+            updated[key] = existing[key]
+    save_environment_doc(path, updated)
 
 
 # ---------------------------------------------------------------------------
