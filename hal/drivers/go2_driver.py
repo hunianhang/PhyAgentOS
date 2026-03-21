@@ -1,4 +1,4 @@
-"""Mock-friendly Go2 navigation driver."""
+"""Mock-friendly Go2 navigation driver with connection lifecycle support."""
 
 from __future__ import annotations
 
@@ -18,10 +18,18 @@ class Go2Driver(BaseDriver):
 
     ROBOT_ID = "go2_edu_001"
 
-    def __init__(self, gui: bool = False, bridge: ROS2Bridge | None = None, **_kwargs: Any):
+    def __init__(self, gui: bool = False, bridge: ROS2Bridge | None = None, **kwargs: Any):
         self._gui = gui
         self._bridge = bridge or ROS2Bridge(enabled=False)
         self._objects: dict[str, dict] = {}
+        self._connection_config = {
+            "transport": kwargs.get("transport", "ssh"),
+            "host": kwargs.get("host", "192.168.1.23"),
+            "port": int(kwargs.get("port", 22)),
+            "user": kwargs.get("user", "robot"),
+            "auth": kwargs.get("auth", "key"),
+            "reconnect_policy": kwargs.get("reconnect_policy", "auto"),
+        }
         self._runtime_state = {"robots": {self.ROBOT_ID: self._make_robot_state()}}
 
     def get_profile_path(self) -> Path:
@@ -30,7 +38,75 @@ class Go2Driver(BaseDriver):
     def load_scene(self, scene: dict[str, dict]) -> None:
         self._objects = dict(scene)
 
+    def connect(self) -> bool:
+        state = self._robot_state(self.ROBOT_ID)
+        conn = dict(state["connection_state"])
+        conn.update(
+            {
+                "status": "connected",
+                "transport": self._connection_config["transport"],
+                "host": self._connection_config["host"],
+                "port": self._connection_config["port"],
+                "last_heartbeat": self._stamp(),
+                "last_error": None,
+            }
+        )
+        state["connection_state"] = conn
+        return True
+
+    def disconnect(self) -> None:
+        state = self._robot_state(self.ROBOT_ID)
+        conn = dict(state["connection_state"])
+        conn.update(
+            {
+                "status": "disconnected",
+                "last_error": None,
+            }
+        )
+        state["connection_state"] = conn
+
+    def is_connected(self) -> bool:
+        return self._robot_state(self.ROBOT_ID)["connection_state"].get("status") == "connected"
+
+    def health_check(self) -> bool:
+        state = self._robot_state(self.ROBOT_ID)
+        conn = dict(state["connection_state"])
+        if self.is_connected():
+            conn["last_heartbeat"] = self._stamp()
+            state["connection_state"] = conn
+            return True
+
+        if self._connection_config.get("reconnect_policy") == "auto":
+            conn["status"] = "reconnecting"
+            conn["reconnect_attempts"] = conn.get("reconnect_attempts", 0) + 1
+            conn["last_error"] = "connection_lost"
+            state["connection_state"] = conn
+            return self.connect()
+        return False
+
     def execute_action(self, action_type: str, params: dict) -> str:
+        if action_type == "connect_robot":
+            self.connect()
+            return "Robot connection established."
+        if action_type == "disconnect_robot":
+            self.disconnect()
+            return "Robot connection closed."
+        if action_type == "reconnect_robot":
+            self.disconnect()
+            self.connect()
+            return "Robot reconnected."
+        if action_type == "check_connection":
+            return "connected" if self.health_check() else "disconnected"
+
+        if not self.is_connected() and not self.connect():
+            self._update_nav_state(
+                params.get("robot_id", self.ROBOT_ID),
+                mode="idle",
+                status="failed",
+                last_error="disconnected",
+            )
+            return "Connection error: robot is not connected."
+
         if action_type == "semantic_navigate":
             return self._semantic_navigate(params)
         if action_type == "localize":
@@ -176,6 +252,15 @@ class Go2Driver(BaseDriver):
 
     def _make_robot_state(self) -> dict[str, Any]:
         return {
+            "connection_state": {
+                "status": "disconnected",
+                "transport": self._connection_config["transport"],
+                "host": self._connection_config["host"],
+                "port": self._connection_config["port"],
+                "last_heartbeat": None,
+                "last_error": None,
+                "reconnect_attempts": 0,
+            },
             "robot_pose": {
                 "frame": "map",
                 "x": 0.0,

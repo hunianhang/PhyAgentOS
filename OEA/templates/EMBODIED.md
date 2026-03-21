@@ -34,10 +34,21 @@ The Critic Agent reads this file to validate whether proposed actions are safe a
 - **Max reach**: 15 cm from base
 - **Collision policy**: Stop immediately on contact force > 2 N
 
+## Connection
+
+- **Transport**: local simulation
+- **Host**: n/a
+- **Port**: n/a
+- **User**: n/a
+- **Auth**: n/a
+- **Reconnect Policy**: auto
+- **Health Check**: driver-defined heartbeat
+
 ## Navigation & Multi-Agent Protocol
 
 - **Environment schema**: `ENVIRONMENT.md` should use `oea.environment.v1` when possible.
 - **Per-robot state isolation**: each robot writes only its own key in `robots.<robot_id>`.
+- **Connection channel**: `robots.<robot_id>.connection_state` is reserved for runtime connection health.
 - **Pose channel**: `robots.<robot_id>.robot_pose` is reserved for localization state.
 - **Navigation channel**: `robots.<robot_id>.nav_state` is reserved for runtime nav/task state.
 - **Scene graph node fields**: semantic navigation expects `id`, `class`, `center`, `size`, and may use `frame`, `track_id`, `last_seen_at`.

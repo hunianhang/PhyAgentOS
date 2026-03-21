@@ -4,16 +4,6 @@ hal/hal_watchdog.py
 
 HAL Watchdog — polls ACTION.md for commands, dispatches them to the
 active driver, and writes updated state back to ENVIRONMENT.md.
-
-The driver is selected at startup via ``--driver <name>`` and loaded
-dynamically from the driver registry.  The driver's EMBODIED.md profile
-is automatically copied into the workspace.
-
-Usage
------
-    python hal/hal_watchdog.py                          # simulation (default)
-    python hal/hal_watchdog.py --driver simulation --gui
-    python hal/hal_watchdog.py --driver go2_edu
 """
 
 from __future__ import annotations
@@ -34,18 +24,11 @@ from hal.simulation.scene_io import (
     save_environment_doc,
 )
 
-# ---------------------------------------------------------------------------
-# Logging
-# ---------------------------------------------------------------------------
 
 def _log(msg: str) -> None:
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"[HAL Watchdog {ts}] {msg}", flush=True)
 
-
-# ---------------------------------------------------------------------------
-# ACTION.md parsing
-# ---------------------------------------------------------------------------
 
 _ACTION_RE = re.compile(r"```json\s*\n(.*?)\n```", re.DOTALL)
 
@@ -59,14 +42,6 @@ def parse_action(content: str) -> dict | None:
         return json.loads(m.group(1))
     except json.JSONDecodeError:
         return None
-
-
-# ---------------------------------------------------------------------------
-# Scene I/O (thin wrapper so watchdog doesn't depend on hal.simulation)
-# ---------------------------------------------------------------------------
-
-_FENCE_OPEN = "```json"
-_FENCE_CLOSE = "```"
 
 
 def _load_scene(path: Path) -> dict[str, dict]:
@@ -91,9 +66,19 @@ def _save_scene(driver, path: Path, scene: dict[str, dict]) -> None:
     save_environment_doc(path, updated)
 
 
-# ---------------------------------------------------------------------------
-# Profile auto-copy
-# ---------------------------------------------------------------------------
+def _ensure_connection(driver) -> None:
+    connect = getattr(driver, "connect", None)
+    is_connected = getattr(driver, "is_connected", None)
+    if callable(connect) and callable(is_connected) and not is_connected():
+        connect()
+
+
+def _refresh_health(driver, env_file: Path) -> None:
+    health_check = getattr(driver, "health_check", None)
+    if callable(health_check):
+        health_check()
+    _save_scene(driver, env_file, driver.get_scene())
+
 
 def _install_profile(driver, workspace: Path) -> None:
     """Copy the driver's EMBODIED.md profile into the workspace."""
@@ -105,10 +90,6 @@ def _install_profile(driver, workspace: Path) -> None:
     else:
         _log(f"WARNING: profile not found at {src}")
 
-
-# ---------------------------------------------------------------------------
-# Main loop
-# ---------------------------------------------------------------------------
 
 def watch_loop(
     workspace: Path,
@@ -127,13 +108,14 @@ def watch_loop(
 
     with driver:
         _install_profile(driver, workspace)
+        _ensure_connection(driver)
 
-        # Initialise scene
         env_file = workspace / "ENVIRONMENT.md"
         scene = _load_scene(env_file)
         driver.load_scene(scene)
+        _refresh_health(driver, env_file)
         _log(f"Scene loaded ({len(scene)} object(s))")
-        _log("Watching ACTION.md … Ctrl+C to stop.\n")
+        _log("Watching ACTION.md ... Ctrl+C to stop.\n")
 
         action_file = workspace / "ACTION.md"
         try:
@@ -145,7 +127,9 @@ def watch_loop(
 
 
 def _poll_once(driver, action_file: Path, env_file: Path) -> None:
-    """Single poll: read ACTION.md → execute → update ENVIRONMENT.md."""
+    """Single poll: refresh connection state, then execute pending ACTION.md."""
+    _refresh_health(driver, env_file)
+
     if not action_file.exists():
         return
     content = action_file.read_text(encoding="utf-8").strip()
@@ -154,14 +138,14 @@ def _poll_once(driver, action_file: Path, env_file: Path) -> None:
 
     action = parse_action(content)
     if action is None:
-        _log("ACTION.md has content but no valid JSON — skipping.")
+        _log("ACTION.md has content but no valid JSON - skipping.")
         return
 
     action_type = action.get("action_type", "unknown")
     params = action.get("parameters", {})
     _log(f"Action: {action_type!r}  params={params}")
 
-    time.sleep(0.3)  # simulate motor spin-up
+    time.sleep(0.3)
 
     result = driver.execute_action(action_type, params)
     _log(f"Result: {result}")
@@ -173,15 +157,11 @@ def _poll_once(driver, action_file: Path, env_file: Path) -> None:
     _log("ACTION.md cleared.\n")
 
 
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
-
 def main() -> None:
     from hal.drivers import list_drivers
 
     parser = argparse.ArgumentParser(
-        description="HAL Watchdog — OpenEmbodiedAgent hardware layer",
+        description="HAL Watchdog - OpenEmbodiedAgent hardware layer",
     )
     parser.add_argument(
         "--driver",
@@ -205,8 +185,7 @@ def main() -> None:
         print("Run 'nanobot onboard' first.", file=sys.stderr)
         sys.exit(1)
 
-    watch_loop(ws, driver_name=args.driver, gui=args.gui,
-               poll_interval=args.interval)
+    watch_loop(ws, driver_name=args.driver, gui=args.gui, poll_interval=args.interval)
 
 
 if __name__ == "__main__":

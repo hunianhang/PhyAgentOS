@@ -4,6 +4,7 @@ Auto-updated by HAL Watchdog and/or side-loaded perception services.
 This file stores a multi-agent environment snapshot in a structured format.
 
 Notes:
+- `robots.<robot_id>.connection_state` stores each robot's runtime connection health and reconnect metadata.
 - `robots.<robot_id>.robot_pose` stores each robot's current pose state.
 - `robots.<robot_id>.nav_state` stores each robot's navigation/task runtime state.
 - `objects` is the object-level world state used by current HAL drivers.
@@ -49,6 +50,15 @@ Notes:
   },
   "robots": {
     "go2_edu_001": {
+      "connection_state": {
+        "status": "connected",
+        "transport": "ssh",
+        "host": "192.168.1.23",
+        "port": 22,
+        "last_heartbeat": "2026-03-17T10:20:30Z",
+        "last_error": null,
+        "reconnect_attempts": 0
+      },
       "robot_pose": {
         "frame": "map",
         "x": 1.23,
