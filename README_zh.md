@@ -32,21 +32,21 @@ OEA 采用**万物皆 Markdown** (State-as-a-File)的协议矩阵，原生支持
 ## 🦾 样例演示
 
 <div align="center">
-  <img src="docs/imgs/setup.gif" alt="rekep" width="400">
+  <img src="docs/imgs/setup.gif" alt="rekep" width="900">
   <br>
   OEA一键部署机械臂，无需写代码 （松灵 PIPER）
 </div>
 
 
 <div align="center">
-  <img src="docs/imgs/SAM3.gif" alt="rekep" width="400">
+  <img src="docs/imgs/SAM3.gif" alt="rekep" width="900">
   <br>
   OEA通过SAM3实现自然语言驱动的抓取任务 （松灵 PIPER）
 </div>
 
 
 <div align="center">
-  <img src="docs/imgs/ReKep.gif" alt="rekep" width="400">
+  <img src="docs/imgs/ReKep.gif" alt="rekep" width="900">
   <br>
   OEA通过ReKep实现自然语言驱动的抓取任务 (越疆 DBot)
 </div>
