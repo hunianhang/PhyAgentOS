@@ -168,4 +168,4 @@ PRs and Issues are welcome! Please refer to `docs/USER_DEVELOPMENT_GUIDE.md` for
 
 ---
 
-**Special Thanks**: This project is developed based on [nanobot](https://github.com/your-repo/nanobot), thanks for providing the lightweight Agent framework. Everyone is welcome to go to the [nanobot](https://github.com/your-repo/nanobot) repository and give it a star!
+**Special Thanks**: This project is developed based on [nanobot](https://github.com/HKUDS/nanobot), thanks for providing the lightweight Agent framework. Everyone is welcome to go to the [nanobot](https://github.com/HKUDS/nanobot) repository and give it a star!
