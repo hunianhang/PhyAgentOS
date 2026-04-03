@@ -110,35 +110,12 @@ paos agent
 
 你将在终端 1 的仿真日志中看到动作的执行，并在终端 2 收到 Agent 的完成确认。
 
-## 🔧 ReKep 新机器人接入 Skill
+如果你想用内置 skill 自动把新机器人接入 `PhyAgentOS-rekep-real-plugin`：
 
-主仓库内置了一个面向社区开发者的 skill：
+1. 先把机器人 SDK 放到 `../PhyAgentOS-rekep-real-plugin/runtime/third_party/<robot_slug>/`，或 `~/.PhyAgentOS/plugins/repos/rekep_real/runtime/third_party/<robot_slug>/`。
+2. 然后直接对智能体说：`帮我接入新机器人 <机器人名>`。
+3. skill 会自动读取 SDK，起草 adapter / factory 改动，并给出部署和启动说明。完整参考见 [docs/PLUGIN_DEVELOPMENT_GUIDE_zh.md](docs/PLUGIN_DEVELOPMENT_GUIDE_zh.md)。
 
-- [`PhyAgentOS/skills/rekep-robot-onboarding`](PhyAgentOS/skills/rekep-robot-onboarding/SKILL.md)
-
-当你要把一套新的机器人 SDK 接进 ReKep 插件时，先把 SDK 放到下面任一目录：
-
-- 本地开发插件仓库：`../PhyAgentOS-rekep-real-plugin/runtime/third_party/<robot_slug>/`
-- 已部署插件副本：`~/.PhyAgentOS/plugins/repos/rekep_real/runtime/third_party/<robot_slug>/`
-
-然后直接对智能体说：
-
-```text
-帮我接入新机器人 <机器人名>
-```
-
-这个 skill 会按 ReKep 插件现有结构自动完成以下工作：
-
-- 读取 SDK 与示例代码
-- 生成或更新 `runtime/<robot_slug>_adapter.py` 或 `runtime/cellbot_adapter.py`
-- 修改 `runtime/robot_factory.py` 完成 family 注册
-- 补齐部署、启动、dry-run、preflight 使用说明
-- 给出 `dobot_bridge.py` 和 `hal/hal_watchdog.py` 的启动命令
-
-如果你希望按完整模板手工开发插件，也可以参考：
-
-- `docs/PLUGIN_DEVELOPMENT_GUIDE_zh.md`
-- `docs/PLUGIN_DEVELOPMENT_GUIDE.md`
 
 ## 📁 Project Structure
 

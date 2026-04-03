@@ -110,35 +110,12 @@ In the `paos agent` CLI, input:
 
 You will see the action execution in the simulation logs in Terminal 1, and receive completion confirmation from the Agent in Terminal 2.
 
-## 🔧 ReKep Robot Onboarding Skill
+To auto-onboard a new robot into `PhyAgentOS-rekep-real-plugin` with the built-in skill:
 
-PhyAgentOS now ships a built-in skill for community developers:
+1. Place the robot SDK under `../PhyAgentOS-rekep-real-plugin/runtime/third_party/<robot_slug>/` or `~/.PhyAgentOS/plugins/repos/rekep_real/runtime/third_party/<robot_slug>/`.
+2. Tell the agent: `Help me onboard a new robot <robot name> into ReKep`.
+3. The skill will inspect the SDK, draft the adapter/factory changes, and return deployment and startup instructions. Full reference: [docs/PLUGIN_DEVELOPMENT_GUIDE.md](docs/PLUGIN_DEVELOPMENT_GUIDE.md).
 
-- [`PhyAgentOS/skills/rekep-robot-onboarding`](PhyAgentOS/skills/rekep-robot-onboarding/SKILL.md)
-
-When you want to integrate a new robot SDK into the ReKep plugin, place the SDK under one of these directories first:
-
-- local plugin source repo: `../PhyAgentOS-rekep-real-plugin/runtime/third_party/<robot_slug>/`
-- deployed plugin checkout: `~/.PhyAgentOS/plugins/repos/rekep_real/runtime/third_party/<robot_slug>/`
-
-Then tell the agent:
-
-```text
-Help me onboard a new robot <robot name> into ReKep
-```
-
-The skill is designed to:
-
-- inspect the SDK and example code
-- generate or update `runtime/<robot_slug>_adapter.py` or `runtime/cellbot_adapter.py`
-- wire the family into `runtime/robot_factory.py`
-- write deployment, startup, dry-run, and preflight instructions
-- return ready-to-run `dobot_bridge.py` and `hal/hal_watchdog.py` commands
-
-If you want to implement the plugin flow manually, see:
-
-- `docs/PLUGIN_DEVELOPMENT_GUIDE.md`
-- `docs/PLUGIN_DEVELOPMENT_GUIDE_zh.md`
 
 ## 📁 Project Structure
 
