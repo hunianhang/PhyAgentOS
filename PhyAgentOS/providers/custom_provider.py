@@ -5,6 +5,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
+import httpx
 import json_repair
 from openai import AsyncOpenAI
 
@@ -16,11 +17,14 @@ class CustomProvider(LLMProvider):
     def __init__(self, api_key: str = "no-key", api_base: str = "http://localhost:8000/v1", default_model: str = "default"):
         super().__init__(api_key, api_base)
         self.default_model = default_model
-        # Keep affinity stable for this provider instance to improve backend cache locality.
+        # Use httpx client with trust_env=False to avoid picking up system SOCKS proxy
+        # that uses the unsupported 'socks://' scheme (httpx only supports socks5://).
+        http_client = httpx.AsyncClient(trust_env=False)
         self._client = AsyncOpenAI(
             api_key=api_key,
             base_url=api_base,
             default_headers={"x-session-affinity": uuid.uuid4().hex},
+            http_client=http_client,
         )
 
     async def chat(self, messages: list[dict[str, Any]], tools: list[dict[str, Any]] | None = None,
