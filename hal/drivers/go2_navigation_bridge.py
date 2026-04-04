@@ -38,7 +38,7 @@ class Go2BridgeConfig:
     ssh_user: str = "unitree"
     ssh_password: str = ""
     ssh_options: tuple[str, ...] = ("-o", "StrictHostKeyChecking=accept-new")
-    remote_project_dir: str = "~/OpenEmbodiedAgent"
+    remote_project_dir: str = "/home/unitree/OpenEmbodiedAgent"
     remote_python: str = "python3"
     remote_setup: str = ""
     remote_ros_choice: str = "1"
@@ -51,7 +51,7 @@ class Go2BridgeConfig:
     remote_data_video_backend: str = "auto"
     remote_data_video_index: int = 4
     remote_motion_backend: str = "auto"
-    remote_motion_sdk_python_path: str = "~/unitree_sdk2_python"
+    remote_motion_sdk_python_path: str = "/home/unitree/unitree_sdk2_python"
     remote_motion_network_interface: str = ""
     remote_motion_require_subscriber: bool = True
     remote_sync_before_start: bool = False
