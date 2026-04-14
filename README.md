@@ -44,6 +44,12 @@ PhyAgentOS utilizes a **"State-as-a-File"** protocol matrix, natively supporting
 </div>
 
 <div align="center">
+  <img src="docs/imgs/XLeRobot.gif" alt="rekep" width="900">
+  <br>
+  PhyAgentOS quickly connects to XLeRobot, automatically checks the robot's status, and after confirming safety, performs basic chassis movement and dual-arm motion.
+</div>
+
+<div align="center">
   <img src="docs/imgs/SAM3.gif" alt="rekep" width="900">
   <br>
   PhyAgentOS achieves natural language-driven grasping tasks through SAM3 (AgileX PIPER).
