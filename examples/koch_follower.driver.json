@@ -1,0 +1,13 @@
+{
+  "arm_type": "koch_follower",
+  "port": "/dev/ttyACM0",
+  "robot_id": "my_koch_arm",
+  "leader_port": "/dev/ttyACM1",
+  "leader_type": "koch_leader",
+  "leader_id": "my_koch_leader",
+  "loop_hz": 50,
+  "use_degrees": true,
+  "max_step_deg": 20.0,
+  "reconnect_policy": "auto",
+  "cameras": {}
+}

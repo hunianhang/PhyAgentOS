@@ -1,0 +1,14 @@
+{
+  "arm_type": "so101_follower",
+  "port": "COM5",
+  "robot_id": "my_so101_arm",
+  "leader_port": "COM4", 
+  "leader_type": "so101_leader", 
+  "leader_id": "my_so101_leader",
+  "leader_id": "my_so101_leader",
+  "loop_hz": 50,
+  "use_degrees": true,
+  "max_step_deg": 20.0,
+  "reconnect_policy": "auto",
+  "cameras": {}
+}

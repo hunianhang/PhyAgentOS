@@ -41,6 +41,9 @@ DRIVER_REGISTRY: dict[str, str] = {
     # Future drivers — uncomment when implemented:
     # "desktop_pet": "hal.drivers.desktop_pet_driver.DesktopPetDriver",
     # "dobot_nova5": "hal.drivers.dobot_driver.DobotDriver",
+    # LeRobot arms (SO-101, Koch v1.1) — Solo-CLI / HuggingFace LeRobot SDK
+    "so101_follower": "hal.drivers.lerobot_arm_driver.SO101FollowerDriver",
+    "koch_follower":  "hal.drivers.lerobot_arm_driver.KochFollowerDriver",
 }
 
 
